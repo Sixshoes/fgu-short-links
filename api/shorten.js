@@ -19,8 +19,18 @@ export default async function handler(req, res) {
     
     const existing = await redis.get(alias);
     if (existing) {
+      if (existing === longUrl) {
+        // Idempotent: exact same mapping already exists, just return success
+        return res.status(200).json({ 
+          success: true, 
+          alias: alias,
+          shortUrl: `/${alias}`
+        });
+      }
+      
       if (customAlias) {
-        return res.status(409).json({ error: '此短碼已經有人使用了，請換一個' });
+        // 此短碼已被其他人使用，自動加上隨機後綴幫他重新生成一個
+        alias = `${customAlias.trim().replace(/^\/+/, '')}-${crypto.randomBytes(2).toString('hex')}`;
       } else {
         alias = crypto.randomBytes(4).toString('hex');
       }
