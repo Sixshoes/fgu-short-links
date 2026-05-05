@@ -5,8 +5,12 @@
       "destination": "/api/:path*"
     },
     {
-      "source": "/:alias*",
-      "destination": "/api/redirect?alias=:alias*"
+      "source": "/fgu-logo.gif",
+      "destination": "/fgu-logo.gif"
+    },
+    {
+      "source": "/(?<alias>.+)",
+      "destination": "/api/redirect?alias=$alias"
     }
   ]
 }
