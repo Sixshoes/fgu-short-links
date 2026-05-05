@@ -15,7 +15,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    let alias = customAlias ? customAlias.trim().replace(/^\/+/, '') : crypto.randomBytes(3).toString('hex');
+    let alias = '';
+    
+    if (customAlias) {
+      let rawAlias = customAlias.trim().replace(/^\/+/, '');
+      // 強制加上 fgu/ 前綴
+      if (rawAlias.startsWith('fgu/')) {
+        alias = rawAlias;
+      } else if (rawAlias === 'fgu') {
+        alias = 'fgu/';
+      } else {
+        alias = `fgu/${rawAlias}`;
+      }
+    } else {
+      // 針對網址生成雜湊 (Hash)
+      const hash = crypto.createHash('md5').update(longUrl).digest('hex').substring(0, 6);
+      alias = `fgu/${hash}`;
+    }
     
     const existing = await redis.get(alias);
     if (existing) {
@@ -28,12 +44,8 @@ export default async function handler(req, res) {
         });
       }
       
-      if (customAlias) {
-        // 此短碼已被其他人使用，自動加上隨機後綴幫他重新生成一個
-        alias = `${customAlias.trim().replace(/^\/+/, '')}-${crypto.randomBytes(2).toString('hex')}`;
-      } else {
-        alias = crypto.randomBytes(4).toString('hex');
-      }
+      // 發生碰撞（不同網址或已被使用），自動加上隨機後綴
+      alias = `${alias}-${crypto.randomBytes(2).toString('hex')}`;
     }
 
     await redis.set(alias, longUrl);
