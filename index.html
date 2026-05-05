@@ -97,18 +97,28 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        .shorten-btn {
-            background: rgba(255, 255, 255, 0.15);
+        .main-action-btn {
+            background-color: var(--fgu-red);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 14px 20px;
+            font-size: 1.1rem;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 0.85rem;
-            transition: background 0.3s;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: bold;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-
-        .shorten-btn:hover { background: rgba(255, 255, 255, 0.25); }
+        .main-action-btn:hover:not(:disabled) { 
+            background-color: var(--fgu-dark); 
+            transform: translateY(-2px);
+        }
+        .main-action-btn:disabled { 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+        }
 
         /* 上傳 Logo 區塊 */
         .upload-area {
@@ -241,13 +251,22 @@
         <p class="subtitle">為您的專案建立帶有 Logo 的高質感條碼</p>
 
         <div class="input-group">
-            <label class="label">Content / URL</label>
+            <label class="label">1. 目標長網址 (必填)</label>
             <div class="url-input-container">
                 <svg viewBox="0 0 256 256"><path d="M136.37,187.53a12,12,0,0,1,0,17l-11.31,11.32a52,52,0,0,1-73.54-73.54l17-17a12,12,0,0,1,17,17l-17,17a28,28,0,0,0,39.6,39.6l11.31-11.32A12,12,0,0,1,136.37,187.53Zm68.21-136.1a52,52,0,0,0-73.54,0l-17,17a12,12,0,0,0,17,17l17-17a28,28,0,0,1,39.6,39.6l-11.31,11.32a12,12,0,0,0,17,17l11.31-11.32A52,52,0,0,0,204.58,51.43Z"/></svg>
                 <input type="text" id="urlInput" placeholder="https://gm.fgu.edu.tw/" oninput="generateQR()">
-                <button class="shorten-btn" onclick="document.getElementById('urlInput').focus()">輸入網址</button>
             </div>
         </div>
+
+        <div class="input-group">
+            <label class="label">2. 自訂短碼 (選填)</label>
+            <div class="url-input-container">
+                <svg viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/></svg>
+                <input type="text" id="aliasInput" placeholder="例如: fgu/survey">
+            </div>
+        </div>
+
+        <button class="main-action-btn" id="mainActionBtn" onclick="createShortLinkAndQR()">🚀 產生短連結與 QR Code</button>
 
         <div class="input-group">
             <label class="label">Center Logo</label>
@@ -292,6 +311,55 @@
         window.onload = function() {
             generateQR();
         };
+
+        // 呼叫 API 建立短網址與 QR Code
+        async function createShortLinkAndQR() {
+            const urlInput = document.getElementById('urlInput');
+            const aliasInput = document.getElementById('aliasInput');
+            const btn = document.getElementById('mainActionBtn');
+            
+            let longUrl = urlInput.value.trim();
+            if (!longUrl) {
+                alert('請輸入目標長網址！');
+                return;
+            }
+
+            if (!/^https?:\/\//i.test(longUrl)) {
+                longUrl = 'https://' + longUrl;
+                urlInput.value = longUrl;
+            }
+
+            const customAlias = aliasInput.value.trim();
+
+            btn.disabled = true;
+            btn.innerText = '處理中...';
+
+            try {
+                const response = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ longUrl, customAlias })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const fullShortUrl = window.location.origin + result.shortUrl;
+                    // 將輸入框的值替換成短網址，並重新生成 QR Code
+                    urlInput.value = fullShortUrl;
+                    generateQR();
+                    alert('短網址建立成功！\n' + fullShortUrl);
+                } else {
+                    alert(result.error || '短網址建立失敗，請稍後再試。');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('發生錯誤，請檢查網路連線。');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🚀 產生短連結與 QR Code';
+            }
+        }
 
         // 處理 Logo 上傳
         function handleLogoUpload(event) {

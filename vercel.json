@@ -1,19 +1,12 @@
 {
-  "redirects": [
+  "rewrites": [
     {
-      "source": "/fgu/survey",
-      "destination": "https://gm.fgu.edu.tw/",
-      "permanent": false
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     },
     {
-      "source": "/fgu/qs-hub",
-      "destination": "https://www.topuniversities.com/",
-      "permanent": true
-    },
-    {
-      "source": "/fgu/the-data",
-      "destination": "https://www.timeshighereducation.com/",
-      "permanent": true
+      "source": "/:alias*",
+      "destination": "/api/redirect?alias=:alias*"
     }
   ]
 }
