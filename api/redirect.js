@@ -1,4 +1,6 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
+
+const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
   const { alias } = req.query;
@@ -8,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const longUrl = await kv.get(alias);
+    const longUrl = await redis.get(alias);
     
     if (longUrl) {
       return res.redirect(302, longUrl);

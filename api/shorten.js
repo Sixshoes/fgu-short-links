@@ -1,4 +1,6 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
+
+const redis = Redis.fromEnv();
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
@@ -15,7 +17,7 @@ export default async function handler(req, res) {
   try {
     let alias = customAlias ? customAlias.trim().replace(/^\/+/, '') : crypto.randomBytes(3).toString('hex');
     
-    const existing = await kv.get(alias);
+    const existing = await redis.get(alias);
     if (existing) {
       if (customAlias) {
         return res.status(409).json({ error: '此短碼已經有人使用了，請換一個' });
@@ -24,7 +26,7 @@ export default async function handler(req, res) {
       }
     }
 
-    await kv.set(alias, longUrl);
+    await redis.set(alias, longUrl);
 
     return res.status(200).json({ 
       success: true, 
