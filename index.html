@@ -3,17 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>短網址導覽中心</title>
+    <title>佛光大學專屬 QR Code 產生器</title>
+    <!-- 引入 QR Code 生成套件 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f9fafb; color: #374151; text-align: center; margin: 0; }
-        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h1 { color: #831c2b; /* 佛光大學紅 */ }
+        :root {
+            --fgu-red: #831c2b; /* 佛光大學專屬紅 */
+            --fgu-red-hover: #631520;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h1 {
+            color: var(--fgu-red);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        p { color: #666; font-size: 0.9rem; margin-bottom: 25px; }
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            background-color: #fafafa;
+            cursor: pointer;
+        }
+        button {
+            background-color: var(--fgu-red);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+        button:hover { background-color: var(--fgu-red-hover); }
+        .result-area {
+            margin-top: 30px;
+            display: none; /* 初始隱藏 */
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 10px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            max-width: 100%;
+            height: auto;
+        }
+        .download-btn {
+            background-color: #10b981;
+            margin-top: 15px;
+        }
+        .download-btn:hover { background-color: #059669; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>專屬連結中心</h1>
-        <p>請使用完整的短網址路徑來進行跳轉（例如：/fgu/survey）</p>
+
+    <div class="card">
+        <h1>專屬 QR Code 產生器</h1>
+        <p>自訂網址並將您的 Logo 完美融入中心</p>
+
+        <div class="input-group">
+            <label for="urlInput">1. 請貼上目標網址 (必填)</label>
+            <input type="text" id="urlInput" placeholder="例如: https://gm.fgu.edu.tw/">
+        </div>
+
+        <div class="input-group">
+            <label for="logoInput">2. 上傳中心圖片 / Logo (選填)</label>
+            <input type="file" id="logoInput" accept="image/png, image/jpeg">
+            <small style="color: #888; display: block; margin-top: 5px;">建議使用正方形 PNG 圖片以獲得最佳效果</small>
+        </div>
+
+        <button onclick="generateQR()">🚀 生成 QR Code</button>
+
+        <div class="result-area" id="resultArea">
+            <canvas id="qrCanvas"></canvas>
+            <button class="download-btn" onclick="downloadQR()">📥 下載高解析度圖片</button>
+        </div>
     </div>
+
+    <script>
+        async function generateQR() {
+            const url = document.getElementById('urlInput').value;
+            const logoFile = document.getElementById('logoInput').files[0];
+            const canvas = document.getElementById('qrCanvas');
+            const ctx = canvas.getContext('2d');
+            const resultArea = document.getElementById('resultArea');
+
+            if (!url) {
+                alert('請先輸入網址喔！');
+                return;
+            }
+
+            // QR Code 設定：高容錯率(H)是為了讓中間放圖片後還能掃描，顏色設為佛光紅
+            const qrOptions = {
+                errorCorrectionLevel: 'H',
+                width: 1000, // 生成高解析度 (1000px)，解決你之前說放大海報會模糊的問題
+                margin: 2,
+                color: {
+                    dark: '#831c2b', 
+                    light: '#ffffff'
+                }
+            };
+
+            try {
+                // 1. 先生成純 QR Code 圖片資料
+                const qrDataUrl = await QRCode.toDataURL(url, qrOptions);
+                
+                // 2. 把 QR Code 畫上畫布
+                const qrImage = new Image();
+                qrImage.onload = function() {
+                    canvas.width = qrImage.width;
+                    canvas.height = qrImage.height;
+                    ctx.drawImage(qrImage, 0, 0);
+
+                    // 3. 如果有上傳 Logo，就疊加在正中間
+                    if (logoFile) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const logoImage = new Image();
+                            logoImage.onload = function() {
+                                // 設定 Logo 大小為 QR Code 的 25% (太大會掃不到)
+                                const logoSize = canvas.width * 0.25;
+                                const x = (canvas.width - logoSize) / 2;
+                                const y = (canvas.height - logoSize) / 2;
+
+                                // 在 Logo 背後畫一個白底圓角矩形，讓 Logo 更凸顯且不與紋理重疊
+                                const bgSize = logoSize + 20;
+                                const bgX = (canvas.width - bgSize) / 2;
+                                const bgY = (canvas.height - bgSize) / 2;
+                                
+                                ctx.fillStyle = '#ffffff';
+                                ctx.beginPath();
+                                ctx.roundRect(bgX, bgY, bgSize, bgSize, 20); // 支援現代瀏覽器的圓角
+                                ctx.fill();
+
+                                // 畫上 Logo
+                                ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+                            }
+                            logoImage.src = event.target.result;
+                        }
+                        reader.readAsDataURL(logoFile);
+                    }
+                    
+                    // 顯示結果區塊
+                    resultArea.style.display = 'flex';
+                }
+                qrImage.src = qrDataUrl;
+
+            } catch (err) {
+                console.error(err);
+                alert('生成失敗，請檢查網址格式是否正確。');
+            }
+        }
+
+        // 下載圖片的功能
+        function downloadQR() {
+            const canvas = document.getElementById('qrCanvas');
+            const link = document.createElement('a');
+            link.download = 'FGU-QRCode.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
 </body>
 </html>
