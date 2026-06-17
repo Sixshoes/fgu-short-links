@@ -97,29 +97,6 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        .main-action-btn {
-            background-color: var(--fgu-red);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 14px 20px;
-            font-size: 1.1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            font-weight: bold;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .main-action-btn:hover:not(:disabled) { 
-            background-color: var(--fgu-dark); 
-            transform: translateY(-2px);
-        }
-        .main-action-btn:disabled { 
-            opacity: 0.6; 
-            cursor: not-allowed; 
-        }
-
         /* 上傳 Logo 區塊 */
         .upload-area {
             background: rgba(0, 0, 0, 0.15);
@@ -242,52 +219,6 @@
 
         /* SVG 圖示 */
         svg { width: 18px; height: 18px; fill: currentColor; }
-
-        /* 顯示短網址結果 */
-        .short-url-result {
-            display: none;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            flex-direction: column;
-            gap: 12px;
-            border: 2px solid var(--fgu-red);
-        }
-
-        #shortUrlText {
-            font-weight: bold;
-            font-size: 1.1rem;
-            word-break: break-all;
-            color: var(--fgu-red);
-        }
-
-        .result-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            background: #f3f4f6;
-            border: 1px solid #ddd;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: 0.2s;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 600;
-        }
-
-        .action-btn:hover { background: #e5e7eb; transform: translateY(-1px); }
     </style>
 </head>
 <body>
@@ -297,22 +228,12 @@
         <p class="subtitle">為您的專案建立帶有 Logo 的高質感條碼</p>
 
         <div class="input-group">
-            <label class="label">1. 目標長網址 (必填)</label>
+            <label class="label">目標網址</label>
             <div class="url-input-container">
                 <svg viewBox="0 0 256 256"><path d="M136.37,187.53a12,12,0,0,1,0,17l-11.31,11.32a52,52,0,0,1-73.54-73.54l17-17a12,12,0,0,1,17,17l-17,17a28,28,0,0,0,39.6,39.6l11.31-11.32A12,12,0,0,1,136.37,187.53Zm68.21-136.1a52,52,0,0,0-73.54,0l-17,17a12,12,0,0,0,17,17l17-17a28,28,0,0,1,39.6,39.6l-11.31,11.32a12,12,0,0,0,17,17l11.31-11.32A52,52,0,0,0,204.58,51.43Z"/></svg>
-                <input type="text" id="urlInput" placeholder="https://gm.fgu.edu.tw/" oninput="currentShortUrl = null; generateQR()">
+                <input type="text" id="urlInput" placeholder="https://gm.fgu.edu.tw/" oninput="generateQR()">
             </div>
         </div>
-
-        <div class="input-group">
-            <label class="label">2. 自訂短碼 (選填)</label>
-            <div class="url-input-container">
-                <svg viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/></svg>
-                <input type="text" id="aliasInput" placeholder="例如: fgu/" oninput="currentShortUrl = null;">
-            </div>
-        </div>
-
-        <button class="main-action-btn" id="mainActionBtn" onclick="createShortLinkAndQR()">🚀 產生短連結與 QR Code</button>
 
         <div class="input-group">
             <label class="label">Center Logo</label>
@@ -329,24 +250,6 @@
             <div class="color-toggles">
                 <button class="color-btn btn-black active" onclick="setColor('#000000', this)">Pure Black</button>
                 <button class="color-btn btn-red" onclick="setColor('#831c2b', this)">FGU Red</button>
-            </div>
-        </div>
-
-        <div class="short-url-result" id="shortUrlResult">
-            <div id="shortUrlText"></div>
-            <div class="result-actions">
-                <button class="action-btn" onclick="copyShortUrl()">
-                    <svg viewBox="0 0 256 256" style="width:14px; height:14px;"><path d="M216,40H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V48A8,8,0,0,0,216,40ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V56H208Z"/></svg>
-                    複製短網址
-                </button>
-                <button class="action-btn" onclick="regenerateRandom()">
-                    <svg viewBox="0 0 256 256" style="width:14px; height:14px;"><path d="M224,128a96,96,0,1,1-96-96V8a8,8,0,0,1,13.66-5.66l24,24a8,8,0,0,1,0,11.32l-24,24A8,8,0,0,1,128,56V48a80,80,0,1,0,80,80,8,8,0,0,1,16,0Z"/></svg>
-                    產生預設短碼
-                </button>
-                <button class="action-btn" onclick="resetForm()" style="background: #fee2e2; border-color: #fca5a5; color: #991b1b;">
-                    <svg viewBox="0 0 256 256" style="width:14px; height:14px;"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg>
-                    清空重來
-                </button>
             </div>
         </div>
 
@@ -370,94 +273,12 @@
     <script>
         let currentColor = '#000000';
         let currentLogoUrl = '/fgu-logo.gif';
-        let currentShortUrl = null;
 
-        // 頁面載入時先生成一個預設的
         window.onload = function() {
             document.getElementById('uploadText').innerText = "預設校徽已載入！點擊可更換";
             document.getElementById('deleteLogoBtn').style.display = 'flex';
             generateQR();
         };
-
-        // 呼叫 API 建立短網址與 QR Code
-        async function createShortLinkAndQR() {
-            const urlInput = document.getElementById('urlInput');
-            const aliasInput = document.getElementById('aliasInput');
-            const btn = document.getElementById('mainActionBtn');
-            
-            let longUrl = urlInput.value.trim();
-            if (!longUrl) {
-                alert('請輸入目標長網址！');
-                return;
-            }
-
-            if (!/^https?:\/\//i.test(longUrl)) {
-                longUrl = 'https://' + longUrl;
-                urlInput.value = longUrl;
-            }
-
-            const customAlias = aliasInput.value.trim();
-
-            btn.disabled = true;
-            btn.innerText = '處理中...';
-
-            try {
-                const response = await fetch('/api/shorten', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ longUrl, customAlias })
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    const fullShortUrl = window.location.origin + result.shortUrl;
-                    
-                    // 紀錄成功產生的短網址，並重新生成 QR Code
-                    currentShortUrl = fullShortUrl;
-                    generateQR();
-
-                    // 顯示專屬的短網址結果區塊
-                    const resultContainer = document.getElementById('shortUrlResult');
-                    const resultText = document.getElementById('shortUrlText');
-                    resultText.innerText = fullShortUrl;
-                    resultContainer.style.display = 'flex';
-
-                } else {
-                    alert(result.error || '短網址建立失敗，請稍後再試。');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('發生錯誤，請檢查網路連線。');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = '🚀 產生短連結與 QR Code';
-            }
-        }
-
-        // 複製短網址功能
-        function copyShortUrl() {
-            const text = document.getElementById('shortUrlText').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('短網址已複製到剪貼簿！');
-            });
-        }
-
-        // 強制重新隨機生成
-        function regenerateRandom() {
-            document.getElementById('aliasInput').value = ''; // 清空自訂碼，強制隨機
-            createShortLinkAndQR();
-        }
-
-        // 清空重來
-        function resetForm() {
-            document.getElementById('urlInput').value = '';
-            document.getElementById('aliasInput').value = '';
-            document.getElementById('shortUrlResult').style.display = 'none';
-            currentShortUrl = null;
-            generateQR(); // 回復預設 QR Code
-            document.getElementById('urlInput').focus();
-        }
 
         // 處理 Logo 上傳
         function handleLogoUpload(event) {
@@ -496,9 +317,8 @@
 
         // 核心：生成 QR Code
         async function generateQR() {
-            const inputUrl = document.getElementById('urlInput').value;
-            // 優先使用剛剛成功產生的短網址，若無則使用長網址輸入框的內容，最後預設值
-            const finalUrl = currentShortUrl || inputUrl || 'https://gm.fgu.edu.tw/'; 
+            const inputUrl = document.getElementById('urlInput').value.trim();
+            const finalUrl = inputUrl || 'https://gm.fgu.edu.tw/'; 
             const canvas = document.getElementById('qrCanvas');
             const ctx = canvas.getContext('2d');
 

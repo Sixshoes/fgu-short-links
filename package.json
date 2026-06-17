@@ -1,10 +1,5 @@
 {
-  "name": "fgu-short-links",
+  "name": "fgu-qrcode-generator",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "@upstash/redis": "^1.28.0",
-    "nanoid": "^5.0.7"
-  }
+  "private": true
 }
